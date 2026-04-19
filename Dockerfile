@@ -1,42 +1,54 @@
 # ============================================================
-# Radio Free Gonzo - Dockerfile
+# AI Radio Station — Dockerfile
+# Platform: linux/amd64 (Ubuntu on VirtualBox compatible)
+# Base: python:3.11-slim (Debian-based, amd64)
 # ============================================================
-FROM python:3.11-slim
 
-LABEL maintainer="Radio Free Gonzo"
-LABEL description="AI-powered internet radio station"
+FROM --platform=linux/amd64 python:3.11-slim
 
-# System deps: ffmpeg (audio), curl (healthcheck)
+# ── System dependencies ───────────────────────────────────────
+# ffmpeg: audio encoding/streaming to Icecast
+# curl: healthcheck + yt-dlp updates
+# ca-certificates: HTTPS for API calls
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg \
-        curl \
-            ca-certificates \
-                && rm -rf /var/lib/apt/lists/*
+    curl \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
-                WORKDIR /app
+# ── Install yt-dlp (standalone binary — more reliable than pip version) ──────
+RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp \
+    -o /usr/local/bin/yt-dlp \
+    && chmod a+rx /usr/local/bin/yt-dlp
 
-                # Copy and install Python dependencies first (layer caching)
-                COPY requirements.txt .
-                RUN pip install --no-cache-dir -r requirements.txt
+# ── Create non-root user ──────────────────────────────────────
+# Running as non-root is safer and avoids VirtualBox shared folder permission issues
+RUN groupadd -r radio && useradd -r -g radio -m -d /app radio
 
-                # Copy application code
-                COPY . .
+WORKDIR /app
 
-                # Create necessary directories
-                RUN mkdir -p outputs/audio_cache
+# ── Install Python dependencies ───────────────────────────────
+# Copy requirements first to leverage Docker layer caching
+COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt
 
-                # Non-root user for security
-                RUN useradd -r -s /bin/false radio && \
-                    chown -R radio:radio /app
-                    USER radio
+# ── Copy application code ─────────────────────────────────────
+COPY --chown=radio:radio . .
 
-                    # Expose web API port
-                    EXPOSE 8080
+# ── Create output directories ─────────────────────────────────
+RUN mkdir -p outputs/audio_cache \
+    && chown -R radio:radio outputs
 
-                    # Health check
-                    HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-                      CMD curl -f http://localhost:8080/health || exit 1
+# ── Switch to non-root user ───────────────────────────────────
+USER radio
 
-                      # Start the station
-                      CMD ["python", "main.py"]
-                      
+# ── Expose web player / API port ─────────────────────────────
+EXPOSE 8080
+
+# ── Health check ─────────────────────────────────────────────
+HEALTHCHECK --interval=30s --timeout=10s --start-period=20s --retries=3 \
+    CMD curl -f http://localhost:8080/health || exit 1
+
+# ── Entrypoint ────────────────────────────────────────────────
+CMD ["python", "main.py"]
