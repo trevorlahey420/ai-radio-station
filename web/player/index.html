@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Radio Free Gonzo</title>
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #12121a;
+      --border: #2a2a3a;
+      --accent: #ff6b00;
+              --accent2: #b040ff;
+              --text: #e8e8f0;
+        --muted: #7070a0;
+      --green: #00ff88;
+}
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+            background: var(--bg);
+      color: var(--text);
+      font-family: 'Courier New', monospace;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+}
+
+    /* SCANLINE OVERLAY */
+    body::before {
+            content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0,0,0,0.03) 2px,
+                rgba(0,0,0,0.03) 4px
+              );
+      pointer-events: none;
+      z-index: 9999;
+}
+
+    header {
+            width: 100%;
+      padding: 2rem 2rem 1rem;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+}
+    .station-name {
+            font-size: clamp(2rem, 6vw, 4rem);
+      font-weight: 900;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+}
+    .tagline {
+      color: var(--muted);
+      font-size: 0.85rem;
+      letter-spacing: 0.2em;
+      margin-top: 0.4rem;
+      text-transform: uppercase;
+}
+    .live-badge {
+            display: inline-block;
+      background: #ff0033;
+            color: white;
+      font-size: 0.7rem;
+      font-weight: bold;
+      letter-spacing: 0.15em;
+      padding: 0.2rem 0.6rem;
+      border-radius: 2px;
+      margin-left: 0.8rem;
+      vertical-align: middle;
+      animation: blink 1.4s ease-in-out infinite;
+}
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    main {
+            width: 100%;
+      max-width: 860px;
+      padding: 2rem;
+            display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+}
+
+    /* PLAYER CARD */
+    .player-card {
+            background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2rem;
+}
+          .now-playing-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.25em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+}
+    .track-title {
+            font-size: clamp(1.3rem, 3vw, 2rem);
+      font-weight: bold;
+      line-height: 1.2;
+      margin-bottom: 0.3rem;
+}
+    .track-artist {
+      font-size: 1.1rem;
+      color: var(--muted);
+      margin-bottom: 0.2rem;
+}
+    .track-meta {
+            font-size: 0.78rem;
+      color: var(--border);
+      margin-bottom: 1.5rem;
+}
+    .track-meta span { margin-right: 1rem; }
+
+    /* AUDIO PLAYER */
+    audio {
+            width: 100%;
+      margin-bottom: 1rem;
+      filter: invert(1) hue-rotate(180deg);
+      border-radius: 2px;
+}
+    .stream-status {
+            font-size: 0.78rem;
+      color: var(--muted);
+      text-align: center;
+}
+    .stream-status .dot {
+      display: inline-block;
+      width: 8px; height: 8px;
+              border-radius: 50%;
+      background: var(--green);
+      margin-right: 0.4rem;
+              animation: pulse 1.5s ease-in-out infinite;
+}
+    @keyframes pulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.4);opacity:0.6} }
+
+    /* VISUALIZER */
+          .visualizer {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 3px;
+      height: 48px;
+      margin: 1rem 0;
+        }
+          .bar {
+      width: 4px;
+              background: linear-gradient(to top, var(--accent), var(--accent2));
+              border-radius: 2px;
+      animation: barAnim 0.8s ease-in-out infinite alternate;
+        }
+    @keyframes barAnim { from{transform:scaleY(0.1)} to{transform:scaleY(1)} }
+
+    /* QUEUE */
+    .section-label {
+            font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+      margin-bottom: 1rem;
+}
+    .queue-list { list-style: none; }
+    .queue-item {
+            display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+}
+    .queue-num { color: var(--muted); min-width: 1.5rem; text-align: right; }
+    .queue-artist { color: var(--text); }
+    .queue-title { color: var(--muted); }
+    .queue-req {
+            margin-left: auto;
+      font-size: 0.72rem;
+      color: var(--accent2);
+      white-space: nowrap;
+}
+    .queue-empty { color: var(--muted); font-size: 0.9rem; padding: 1rem 0; }
+
+    /* REQUEST FORM */
+    .request-form {
+            background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1.5rem;
+}
+    .request-form h3 {
+            font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+}
+    .input-row {
+            display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+}
+    .request-form input {
+            flex: 1;
+      min-width: 180px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.6rem 0.9rem;
+      font-family: inherit;
+      font-size: 0.9rem;
+      border-radius: 2px;
+      outline: none;
+}
+    .request-form input:focus { border-color: var(--accent); }
+    .request-form button {
+            background: var(--accent);
+      color: #000;
+      border: none;
+      padding: 0.6rem 1.4rem;
+      font-family: inherit;
+      font-weight: bold;
+      font-size: 0.9rem;
+      cursor: pointer;
+      border-radius: 2px;
+      transition: background 0.2s;
+}
+    .request-form button:hover { background: #ff8c2a; }
+          .request-msg { margin-top: 0.6rem; font-size: 0.82rem; color: var(--green); min-height: 1.2em; }
+
+    footer {
+            padding: 2rem;
+      text-align: center;
+      color: var(--border);
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+}
+  </style>
+    </head>
+    <body>
+
+    <header>
+      <div class="station-name" id="stationName">Radio Free Gonzo <span class="live-badge">LIVE</span></div>
+  <div class="tagline" id="tagline">Broadcasting from the edge of reason</div>
+    </header>
+
+    <main>
+      <!-- PLAYER -->
+      <div class="player-card">
+        <div class="now-playing-label">Now Playing</div>
+        <div class="track-title" id="trackTitle">Connecting to stream...</div>
+        <div class="track-artist" id="trackArtist">&nbsp;</div>
+        <div class="track-meta">
+          <span id="trackAlbum"></span>
+          <span id="trackGenre"></span>
+          <span id="trackReq"></span>
+        </div>
+
+        <!-- Animated visualizer bars -->
+        <div class="visualizer" id="visualizer"></div>
+
+        <audio id="audioPlayer" controls autoplay>
+          <source id="streamSrc" src="" type="audio/mpeg" />
+          Your browser does not support audio streaming.
+        </audio>
+    <div class="stream-status">
+      <span class="dot"></span>
+      <span id="streamStatus">Connecting...</span>
+    </div>
+  </div>
+
+    <!-- QUEUE -->
+  <div>
+    <div class="section-label">Up Next</div>
+        <ul class="queue-list" id="queueList">
+          <li class="queue-empty">Loading queue...</li>
+        </ul>
+      </div>
+
+      <!-- REQUEST -->
+      <div class="request-form">
+        <h3>Request a Track</h3>
+    <div class="input-row">
+      <input type="text" id="reqArtist" placeholder="Artist" />
+          <input type="text" id="reqTitle"  placeholder="Song title (optional)" />
+          <button onclick="submitRequest()">REQUEST</button>
+        </div>
+        <div class="request-msg" id="reqMsg"></div>
+      </div>
+    </main>
+
+<footer>
+      RADIO FREE GONZO &mdash; AI-POWERED INTERNET RADIO &mdash; ALL NIGHT, ALL WRONG
+</footer>
+
+    <script>
+      const STREAM_URL   = window.STREAM_URL   || 'http://localhost:8000/stream';
+  const API_BASE     = window.API_BASE     || 'http://localhost:8080';
+  const POLL_INTERVAL = 5000; // ms
+
+  // ── VISUALIZER BARS ───────────────────────────────────────────────────────
+  const viz = document.getElementById('visualizer');
+  for (let i = 0; i < 32; i++) {
+    const bar = document.createElement('div');
+    bar.className = 'bar';
+    const height = Math.random() * 80 + 20;
+    bar.style.height = height + '%';
+    bar.style.animationDuration = (Math.random() * 0.6 + 0.5) + 's';
+    bar.style.animationDelay    = (Math.random() * 0.4) + 's';
+    viz.appendChild(bar);
+  }
+
+  // ── AUDIO PLAYER ─────────────────────────────────────────────────────────
+  const audio = document.getElementById('audioPlayer');
+  document.getElementById('streamSrc').src = STREAM_URL;
+  audio.load();
+
+  audio.addEventListener('playing', () => {
+        document.getElementById('streamStatus').textContent = 'Live — ' + STREAM_URL;
+});
+  audio.addEventListener('error', () => {
+        document.getElementById('streamStatus').textContent = 'Stream offline — retrying...';
+    setTimeout(() => { audio.load(); audio.play(); }, 5000);
+});
+  audio.addEventListener('waiting', () => {
+        document.getElementById('streamStatus').textContent = 'Buffering...';
+});
+
+  // ── NOW PLAYING POLL ─────────────────────────────────────────────────────
+  let lastTitle = '';
+
+  async function pollNowPlaying() {
+    try {
+      const resp = await fetch(API_BASE + '/now_playing');
+      const data = await resp.json();
+      const np   = data.now_playing || {};
+
+      const title  = np.title  || 'Unknown Track';
+      const artist = np.artist || 'Unknown Artist';
+
+      if (title !== lastTitle) {
+        document.getElementById('trackTitle').textContent  = title;
+        document.getElementById('trackArtist').textContent = artist;
+        document.getElementById('trackAlbum').textContent  = np.album  ? 'Album: ' + np.album  : '';
+        document.getElementById('trackGenre').textContent  = np.genre  ? 'Genre: ' + np.genre  : '';
+        document.getElementById('trackReq').textContent    = np.requested_by ? 'Req: ' + np.requested_by : '';
+        document.title = artist + ' — ' + title + ' | Radio Free Gonzo';
+        lastTitle = title;
+}
+} catch(e) {
+      // API not reachable — keep showing last known
+}
+}
+
+  // ── QUEUE POLL ────────────────────────────────────────────────────────────
+  async function pollQueue() {
+    try {
+      const resp  = await fetch(API_BASE + '/queue');
+      const queue = await resp.json();
+      const list  = document.getElementById('queueList');
+      list.innerHTML = '';
+
+      if (!queue || queue.length === 0) {
+        list.innerHTML = '<li class="queue-empty">Queue is loading...</li>';
+        return;
+}
+
+      queue.slice(0, 8).forEach((t, i) => {
+        const li = document.createElement('li');
+        li.className = 'queue-item';
+        li.innerHTML = `
+          <span class="queue-num">${i + 1}</span>
+          <span class="queue-artist">${escHtml(t.artist || '?')}</span>
+          <span class="queue-title">${t.title ? '— ' + escHtml(t.title) : ''}</span>
+          ${t.requested_by ? '<span class="queue-req">req: ' + escHtml(t.requested_by) + '</span>' : ''}
+        `;
+        list.appendChild(li);
+});
+} catch(e) {}
+}
+
+  function escHtml(str) {
+    return String(str)
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;');
+}
+
+  // ── REQUEST ───────────────────────────────────────────────────────────────
+  async function submitRequest() {
+    const artist = document.getElementById('reqArtist').value.trim();
+    const title  = document.getElementById('reqTitle').value.trim();
+    const msg    = document.getElementById('reqMsg');
+
+    if (!artist) { msg.style.color='#ff4455'; msg.textContent='Artist name required.'; return; }
+
+    try {
+      const resp = await fetch(API_BASE + '/request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ artist, title, requested_by: 'web' }),
+});
+      const data = await resp.json();
+      if (resp.ok) {
+        msg.style.color = 'var(--green)';
+        msg.textContent = 'Queued: ' + artist + (title ? ' — ' + title : '') + '. Doctor Gonzo will get to it.';
+        document.getElementById('reqArtist').value = '';
+        document.getElementById('reqTitle').value  = '';
+} else {
+        msg.style.color = '#ff4455';
+        msg.textContent = data.error || 'Request failed.';
+}
+} catch(e) {
+      msg.style.color = '#ff4455';
+      msg.textContent = 'Could not reach station API.';
+}
+}
+
+  // ── INIT ──────────────────────────────────────────────────────────────────
+  pollNowPlaying();
+  pollQueue();
+  setInterval(pollNowPlaying, POLL_INTERVAL);
+  setInterval(pollQueue, POLL_INTERVAL * 2);
+</script>
+</body>
+</html>
