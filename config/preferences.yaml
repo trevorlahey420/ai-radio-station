@@ -1,110 +1,110 @@
-# =============================================================
+# ==============================================================
 # AI RADIO STATION — USER PREFERENCES CONFIG
 # Edit this file to control the station's music taste & behavior
 # Changes are picked up dynamically — no restart required
-# =============================================================
+# ==============================================================
 
-# ── MUSIC TASTE ───────────────────────────────────────────────
+# — MUSIC TASTE ————————————————————————————————————————————————
 favorite_artists:
   - Radiohead
-    - Kendrick Lamar
-      - Nine Inch Nails
-        - Portishead
-          - Death Grips
-            - Aphex Twin
-              - Nick Cave and the Bad Seeds
-                - Tool
-                  - Bjork
-                    - PJ Harvey
+  - Kendrick Lamar
+  - Nine Inch Nails
+  - Portishead
+  - Death Grips
+  - Aphex Twin
+  - Nick Cave and the Bad Seeds
+  - Tool
+  - Bjork
+  - PJ Harvey
 
-                    favorite_genres:
-                      - alternative rock
-                        - hip hop
-                          - electronic
-                            - ambient
-                              - trip hop
-                                - industrial
-                                  - post-rock
-                                    - art rock
+favorite_genres:
+  - alternative rock
+  - hip hop
+  - electronic
+  - post-rock
+  - industrial
+  - ambient
+  - jazz
+  - psychedelic
 
-                                    # ── MOOD SCHEDULING ──────────────────────────────────────────
-                                    mood_preferences:
-                                      morning:       # 06:00 – 11:59
-                                          - upbeat
-                                              - energetic
-                                                  - motivating
-                                                    daytime:       # 12:00 – 17:59
-                                                        - focused
-                                                            - driving
-                                                                - eclectic
-                                                                  evening:       # 18:00 – 21:59
-                                                                      - atmospheric
-                                                                          - melancholic
-                                                                              - cinematic
-                                                                                nighttime:     # 22:00 – 05:59
-                                                                                    - dark
-                                                                                        - experimental
-                                                                                            - chill
-                                                                                                - hypnotic
+mood_preferences:
+  daytime:
+    - energetic
+    - focused
+    - upbeat
+  nighttime:
+    - dark
+    - introspective
+    - atmospheric
+    - trippy
 
-                                                                                                # ── DISCOVERY ─────────────────────────────────────────────────
-                                                                                                # 0.0 = only known favorites  |  1.0 = maximum exploration
-                                                                                                discovery_level: 0.7
+disliked_artists:
+  - Nickelback
+  - Maroon 5
+  - Ed Sheeran
 
-                                                                                                # How many "safe" tracks between experimental picks
-                                                                                                safe_track_buffer: 3
+explicit_content: true
 
-                                                                                                # ── CONTENT FILTERS ──────────────────────────────────────────
-                                                                                                explicit_content: true
+# 0 = play only known favorites, 1 = highly exploratory (discovers new artists)
+discovery_level: 0.7
 
-                                                                                                disliked_artists: []
-                                                                                                  # - Artist Name
+# — BUDGET MODE (DEFAULT: ON) ————————————————————————————————
+# Keeps API costs minimal. Uses cheapest models and TTS provider.
+# Set to false only if you want higher quality and don't mind the cost.
+budget_mode: true
 
-                                                                                                  banned_genres: []
-                                                                                                    # - genre name
-                                                                                                    
-                                                                                                    # ── ARTIST SIMILARITY ─────────────────────────────────────────
-                                                                                                    # Max artists expanded via similarity per session
-                                                                                                    max_similar_artists: 20
-                                                                                                    
-                                                                                                    # Depth of similarity graph traversal (1 = direct, 3 = third-degree)
-                                                                                                    similarity_depth: 2
-                                                                                                    
-                                                                                                    # ── TRACK ROTATION ────────────────────────────────────────────
-                                                                                                    # Minimum minutes before an artist repeats
-                                                                                                    artist_cooldown_minutes: 60
-                                                                                                    
-                                                                                                    # Minimum minutes before exact track repeats
-                                                                                                    track_cooldown_minutes: 180
-                                                                                                    
-                                                                                                    # Max consecutive tracks from same genre
-                                                                                                    max_genre_streak: 4
-                                                                                                    
-                                                                                                    # ── DJ PERSONA ────────────────────────────────────────────────
-                                                                                                    dj_name: "Doctor Gonzo"
-                                                                                                    dj_voice_provider: "elevenlabs"   # options: elevenlabs | openai | local
-                                                                                                    dj_voice_id: "gonzo_voice_id"     # provider-specific voice ID
-                                                                                                    
-                                                                                                    # Frequency of DJ intros/outros (every N tracks)
-                                                                                                    dj_speak_every_n_tracks: 3
-                                                                                                    
-                                                                                                    # How verbose the DJ is (0=minimal, 1=full rants)
-                                                                                                    dj_verbosity: 0.85
-                                                                                                    
-                                                                                                    # ── STREAM QUALITY ────────────────────────────────────────────
-                                                                                                    audio_bitrate: 192        # kbps — 128 | 192 | 256 | 320
-                                                                                                    audio_format: "mp3"       # mp3 | aac | ogg
-                                                                                                    stream_port: 8000
-                                                                                                    
-                                                                                                    # ── STATION IDENTITY ──────────────────────────────────────────
-                                                                                                    station_name: "Radio Free Gonzo"
-                                                                                                    station_tagline: "Broadcasting from the edge of reason"
-                                                                                                    station_timezone: "America/New_York"
-                                                                                                    
-                                                                                                    # ── LOCATION (for weather segments) ──────────────────────────
-                                                                                                    location:
-                                                                                                      city: "Las Vegas"
-                                                                                                        country: "US"
-                                                                                                          lat: 36.1699
-                                                                                                            lon: -115.1398
-                                                                                                            
+# — LLM SETTINGS ————————————————————————————————————————————
+# These are automatically set by budget_mode above.
+# You can override them manually here if budget_mode is false.
+llm:
+  # Budget: gpt-4o-mini (~$0.15/1M tokens vs $5/1M for gpt-4o)
+  budget_model: "gpt-4o-mini"
+  quality_model: "gpt-4o"
+  provider: "openai"   # openai | anthropic | local
+
+  # Role overrides (optional — leave blank to use budget/quality model)
+  playlist_model: ""
+  dj_script_model: ""
+  news_model: ""
+  moderation_model: ""
+
+# — TTS / DJ VOICE ————————————————————————————————————————————
+tts:
+  # Budget: openai (cheap, good quality)
+  # Quality: elevenlabs (more expressive, costs more)
+  provider: "openai"    # openai | elevenlabs | piper (local/free)
+
+  # OpenAI TTS settings (used when provider = openai)
+  openai_voice: "onyx"  # onyx = deep, gravelly — fits Gonzo DJ well
+  openai_model: "tts-1" # tts-1 = cheap | tts-1-hd = higher quality
+
+  # ElevenLabs settings (used when provider = elevenlabs)
+  elevenlabs_voice_id: ""  # set via ELEVENLABS_VOICE_ID env var
+
+  # Piper settings (used when provider = piper — fully local, free)
+  piper_model: "en_US-danny-low"
+
+# — STREAM SETTINGS ——————————————————————————————————————————
+stream:
+  quality: 128          # kbps — 128 is good quality, low bandwidth
+  format: "mp3"
+  port: 8080
+
+# — NEWS & WEATHER ————————————————————————————————————————————
+news:
+  enabled: true
+  interval_hours: 4     # how often to insert a news segment
+  segment_duration_minutes: 5  # budget: 5 min instead of 10
+  location: "New York"  # for weather
+
+# — DISCORD ———————————————————————————————————————————————————
+discord:
+  enabled: false        # set to true and add DISCORD_TOKEN to .env
+  prefix: "!"
+  max_queue_requests: 5
+
+# — STATION IDENTITY ——————————————————————————————————————————
+station:
+  name: "Radio Free Gonzo"
+  tagline: "Broadcasting from the edge of reason"
+  timezone: "America/New_York"
