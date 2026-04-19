@@ -1,0 +1,110 @@
+# =============================================================
+# AI RADIO STATION — USER PREFERENCES CONFIG
+# Edit this file to control the station's music taste & behavior
+# Changes are picked up dynamically — no restart required
+# =============================================================
+
+# ── MUSIC TASTE ───────────────────────────────────────────────
+favorite_artists:
+  - Radiohead
+    - Kendrick Lamar
+      - Nine Inch Nails
+        - Portishead
+          - Death Grips
+            - Aphex Twin
+              - Nick Cave and the Bad Seeds
+                - Tool
+                  - Bjork
+                    - PJ Harvey
+
+                    favorite_genres:
+                      - alternative rock
+                        - hip hop
+                          - electronic
+                            - ambient
+                              - trip hop
+                                - industrial
+                                  - post-rock
+                                    - art rock
+
+                                    # ── MOOD SCHEDULING ──────────────────────────────────────────
+                                    mood_preferences:
+                                      morning:       # 06:00 – 11:59
+                                          - upbeat
+                                              - energetic
+                                                  - motivating
+                                                    daytime:       # 12:00 – 17:59
+                                                        - focused
+                                                            - driving
+                                                                - eclectic
+                                                                  evening:       # 18:00 – 21:59
+                                                                      - atmospheric
+                                                                          - melancholic
+                                                                              - cinematic
+                                                                                nighttime:     # 22:00 – 05:59
+                                                                                    - dark
+                                                                                        - experimental
+                                                                                            - chill
+                                                                                                - hypnotic
+
+                                                                                                # ── DISCOVERY ─────────────────────────────────────────────────
+                                                                                                # 0.0 = only known favorites  |  1.0 = maximum exploration
+                                                                                                discovery_level: 0.7
+
+                                                                                                # How many "safe" tracks between experimental picks
+                                                                                                safe_track_buffer: 3
+
+                                                                                                # ── CONTENT FILTERS ──────────────────────────────────────────
+                                                                                                explicit_content: true
+
+                                                                                                disliked_artists: []
+                                                                                                  # - Artist Name
+
+                                                                                                  banned_genres: []
+                                                                                                    # - genre name
+                                                                                                    
+                                                                                                    # ── ARTIST SIMILARITY ─────────────────────────────────────────
+                                                                                                    # Max artists expanded via similarity per session
+                                                                                                    max_similar_artists: 20
+                                                                                                    
+                                                                                                    # Depth of similarity graph traversal (1 = direct, 3 = third-degree)
+                                                                                                    similarity_depth: 2
+                                                                                                    
+                                                                                                    # ── TRACK ROTATION ────────────────────────────────────────────
+                                                                                                    # Minimum minutes before an artist repeats
+                                                                                                    artist_cooldown_minutes: 60
+                                                                                                    
+                                                                                                    # Minimum minutes before exact track repeats
+                                                                                                    track_cooldown_minutes: 180
+                                                                                                    
+                                                                                                    # Max consecutive tracks from same genre
+                                                                                                    max_genre_streak: 4
+                                                                                                    
+                                                                                                    # ── DJ PERSONA ────────────────────────────────────────────────
+                                                                                                    dj_name: "Doctor Gonzo"
+                                                                                                    dj_voice_provider: "elevenlabs"   # options: elevenlabs | openai | local
+                                                                                                    dj_voice_id: "gonzo_voice_id"     # provider-specific voice ID
+                                                                                                    
+                                                                                                    # Frequency of DJ intros/outros (every N tracks)
+                                                                                                    dj_speak_every_n_tracks: 3
+                                                                                                    
+                                                                                                    # How verbose the DJ is (0=minimal, 1=full rants)
+                                                                                                    dj_verbosity: 0.85
+                                                                                                    
+                                                                                                    # ── STREAM QUALITY ────────────────────────────────────────────
+                                                                                                    audio_bitrate: 192        # kbps — 128 | 192 | 256 | 320
+                                                                                                    audio_format: "mp3"       # mp3 | aac | ogg
+                                                                                                    stream_port: 8000
+                                                                                                    
+                                                                                                    # ── STATION IDENTITY ──────────────────────────────────────────
+                                                                                                    station_name: "Radio Free Gonzo"
+                                                                                                    station_tagline: "Broadcasting from the edge of reason"
+                                                                                                    station_timezone: "America/New_York"
+                                                                                                    
+                                                                                                    # ── LOCATION (for weather segments) ──────────────────────────
+                                                                                                    location:
+                                                                                                      city: "Las Vegas"
+                                                                                                        country: "US"
+                                                                                                          lat: 36.1699
+                                                                                                            lon: -115.1398
+                                                                                                            
