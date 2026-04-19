@@ -1,0 +1,100 @@
+version: "3.9"
+
+# ============================================================
+# Radio Free Gonzo - Docker Compose
+# ============================================================
+# Services:
+#   icecast   - Audio streaming server (Icecast2)
+#   radio     - Main Python app (scheduler + API + Discord bot)
+#
+# Usage:
+#   cp .env.example .env       # Fill in your API keys
+#   docker compose up -d       # Start everything
+#   docker compose logs -f     # Follow logs
+# ============================================================
+
+services:
+
+  # ── ICECAST STREAMING SERVER ──────────────────────────────
+    icecast:
+        image: moul/icecast
+            restart: unless-stopped
+                ports:
+                      - "8000:8000"       # Listener stream port
+                          environment:
+                                ICECAST_SOURCE_PASSWORD: ${ICECAST_PASSWORD:-hackme}
+                                      ICECAST_ADMIN_PASSWORD:  ${ICECAST_ADMIN_PASSWORD:-admin}
+                                            ICECAST_PASSWORD:        ${ICECAST_PASSWORD:-hackme}
+                                                  ICECAST_RELAY_PASSWORD:  ${ICECAST_PASSWORD:-hackme}
+                                                        ICECAST_MAX_CLIENTS:     "100"
+                                                              ICECAST_MAX_SOURCES:     "4"
+                                                                  volumes:
+                                                                        - icecast_logs:/var/log/icecast2
+                                                                            healthcheck:
+                                                                                  test: ["CMD", "curl", "-f", "http://localhost:8000/status.xsl"]
+                                                                                        interval: 30s
+                                                                                              timeout: 10s
+                                                                                                    retries: 3
+                                                                                                    
+                                                                                                      # ── RADIO STATION (MAIN APP) ──────────────────────────────
+                                                                                                        radio:
+                                                                                                            build:
+                                                                                                                  context: .
+                                                                                                                        dockerfile: Dockerfile
+                                                                                                                            restart: unless-stopped
+                                                                                                                                depends_on:
+                                                                                                                                      icecast:
+                                                                                                                                              condition: service_healthy
+                                                                                                                                                  ports:
+                                                                                                                                                        - "8080:8080"       # Web API + player
+                                                                                                                                                            environment:
+                                                                                                                                                                  # LLM Providers
+                                                                                                                                                                        OPENAI_API_KEY:       ${OPENAI_API_KEY}
+                                                                                                                                                                              ANTHROPIC_API_KEY:    ${ANTHROPIC_API_KEY}
+                                                                                                                                                                              
+                                                                                                                                                                                    # LLM Routing overrides (optional)
+                                                                                                                                                                                          LLM_PLAYLIST_PROVIDER: ${LLM_PLAYLIST_PROVIDER:-openai}
+                                                                                                                                                                                                LLM_PLAYLIST_MODEL:    ${LLM_PLAYLIST_MODEL:-gpt-4o}
+                                                                                                                                                                                                      LLM_DJ_PROVIDER:       ${LLM_DJ_PROVIDER:-anthropic}
+                                                                                                                                                                                                            LLM_DJ_MODEL:          ${LLM_DJ_MODEL:-claude-3-5-sonnet-20241022}
+                                                                                                                                                                                                                  LLM_NEWS_PROVIDER:     ${LLM_NEWS_PROVIDER:-openai}
+                                                                                                                                                                                                                        LLM_NEWS_MODEL:        ${LLM_NEWS_MODEL:-gpt-4o-mini}
+                                                                                                                                                                                                                        
+                                                                                                                                                                                                                              # TTS
+                                                                                                                                                                                                                                    ELEVENLABS_API_KEY:   ${ELEVENLABS_API_KEY:-}
+                                                                                                                                                                                                                                          ELEVENLABS_VOICE_ID:  ${ELEVENLABS_VOICE_ID:-}
+                                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                                # Icecast connection
+                                                                                                                                                                                                                                                      ICECAST_HOST:     icecast
+                                                                                                                                                                                                                                                            ICECAST_PORT:     "8000"
+                                                                                                                                                                                                                                                                  ICECAST_PASSWORD: ${ICECAST_PASSWORD:-hackme}
+                                                                                                                                                                                                                                                                        ICECAST_MOUNT:    /stream
+                                                                                                                                                                                                                                                                        
+                                                                                                                                                                                                                                                                              # News & Weather
+                                                                                                                                                                                                                                                                                    NEWSAPI_KEY:       ${NEWSAPI_KEY:-}
+                                                                                                                                                                                                                                                                                          OPENWEATHER_KEY:   ${OPENWEATHER_KEY:-}
+                                                                                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                                                                                # Discord (optional)
+                                                                                                                                                                                                                                                                                                      DISCORD_BOT_TOKEN:       ${DISCORD_BOT_TOKEN:-}
+                                                                                                                                                                                                                                                                                                            DISCORD_REQUEST_CHANNEL: ${DISCORD_REQUEST_CHANNEL:-song-requests}
+                                                                                                                                                                                                                                                                                                                  DISCORD_ADMIN_ROLE:      ${DISCORD_ADMIN_ROLE:-DJ Admin}
+                                                                                                                                                                                                                                                                                                                  
+                                                                                                                                                                                                                                                                                                                        # Web API
+                                                                                                                                                                                                                                                                                                                              API_HOST: "0.0.0.0"
+                                                                                                                                                                                                                                                                                                                                    API_PORT: "8080"
+                                                                                                                                                                                                                                                                                                                                    
+                                                                                                                                                                                                                                                                                                                                          # Local LLM (optional - Ollama)
+                                                                                                                                                                                                                                                                                                                                                LOCAL_LLM_BASE_URL: ${LOCAL_LLM_BASE_URL:-http://localhost:11434/v1}
+                                                                                                                                                                                                                                                                                                                                                    volumes:
+                                                                                                                                                                                                                                                                                                                                                          - ./config:/app/config           # Live-editable config
+                                                                                                                                                                                                                                                                                                                                                                - ./outputs:/app/outputs         # State + cache
+                                                                                                                                                                                                                                                                                                                                                                    healthcheck:
+                                                                                                                                                                                                                                                                                                                                                                          test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+                                                                                                                                                                                                                                                                                                                                                                                interval: 30s
+                                                                                                                                                                                                                                                                                                                                                                                      timeout: 10s
+                                                                                                                                                                                                                                                                                                                                                                                            retries: 5
+                                                                                                                                                                                                                                                                                                                                                                                                  start_period: 60s
+                                                                                                                                                                                                                                                                                                                                                                                                  
+                                                                                                                                                                                                                                                                                                                                                                                                  volumes:
+                                                                                                                                                                                                                                                                                                                                                                                                    icecast_logs:
+                                                                                                                                                                                                                                                                                                                                                                                                    
