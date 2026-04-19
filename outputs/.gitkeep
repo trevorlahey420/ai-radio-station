@@ -1,0 +1,6 @@
+# This file keeps the outputs/ directory tracked by git.
+# Runtime files written here by the station:
+#   now_playing.json  - current track state
+#   current_queue.json - upcoming queue
+#   station.log       - application log
+#   audio_cache/      - downloaded audio (gitignored)
