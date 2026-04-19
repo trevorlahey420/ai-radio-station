@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+env/
+.env
+*.egg-info/
+dist/
+build/
+
+# Secrets - never commit these
+.env
+*.key
+*.pem
+
+# Audio cache - large binary files
+outputs/audio_cache/
+outputs/station.log
+
+# Keep outputs dir structure but not generated files
+# outputs/now_playing.json and current_queue.json are runtime state
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Docker
+.docker/
