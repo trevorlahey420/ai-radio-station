@@ -1,0 +1,92 @@
+# =============================================================
+# AI RADIO STATION — SCHEDULE CONFIG
+# Controls timing for segments, rotations, and automated events
+# =============================================================
+
+# ── NEWS & WEATHER SEGMENTS ──────────────────────────────────
+news_weather:
+  enabled: true
+    interval_hours: 4        # Segment fires every N hours
+      segment_duration_minutes: 10
+        # Fixed times to broadcast (24h format). If set, overrides interval.
+          fixed_times:
+              - "06:00"
+                  - "10:00"
+                      - "14:00"
+                          - "18:00"
+                              - "22:00"
+                                news_sources:
+                                    - name: "NewsAPI"
+                                          max_articles: 5
+                                                categories:
+                                                        - general
+                                                                - technology
+                                                                        - entertainment
+                                                                          weather_enabled: true
+
+                                                                          # ── DJ SEGMENT RULES ──────────────────────────────────────────
+                                                                          dj_segments:
+                                                                            intro_at_startup: true
+                                                                              sign_on_message: true    # Opening monologue when station starts
+                                                                                sign_off_message: true   # Closing if station shuts down cleanly
+                                                                                  hourly_id: true          # Station ID every hour
+                                                                                    hourly_id_template: "You're listening to {station_name}. The time is {time}. Don't touch that dial."
+
+                                                                                    # ── TRACK ROTATION SCHEDULE ──────────────────────────────────
+                                                                                    rotation:
+                                                                                      # Blocks define how the playlist shifts throughout the day
+                                                                                        blocks:
+                                                                                            - name: "Morning Rush"
+                                                                                                  start: "06:00"
+                                                                                                        end: "11:59"
+                                                                                                              mood_override: null    # null = use preferences.yaml moods
+                                                                                                                    bpm_range: [100, 145]
+                                                                                                                          discovery_boost: 0.0   # Add to base discovery_level
+                                                                                                                          
+                                                                                                                              - name: "Afternoon Drive"
+                                                                                                                                    start: "12:00"
+                                                                                                                                          end: "17:59"
+                                                                                                                                                mood_override: null
+                                                                                                                                                      bpm_range: [80, 140]
+                                                                                                                                                            discovery_boost: 0.1
+                                                                                                                                                            
+                                                                                                                                                                - name: "Evening Atmosphere"
+                                                                                                                                                                      start: "18:00"
+                                                                                                                                                                            end: "21:59"
+                                                                                                                                                                                  mood_override: null
+                                                                                                                                                                                        bpm_range: [60, 110]
+                                                                                                                                                                                              discovery_boost: 0.2
+                                                                                                                                                                                              
+                                                                                                                                                                                                  - name: "Late Night Abyss"
+                                                                                                                                                                                                        start: "22:00"
+                                                                                                                                                                                                              end: "05:59"
+                                                                                                                                                                                                                    mood_override: null
+                                                                                                                                                                                                                          bpm_range: [40, 120]
+                                                                                                                                                                                                                                discovery_boost: 0.3
+                                                                                                                                                                                                                                
+                                                                                                                                                                                                                                # ── REQUEST WINDOW ────────────────────────────────────────────
+                                                                                                                                                                                                                                requests:
+                                                                                                                                                                                                                                  enabled: true
+                                                                                                                                                                                                                                    max_queue_size: 10
+                                                                                                                                                                                                                                      # Requests are honored after current track, before next auto-pick
+                                                                                                                                                                                                                                        honor_immediately: false
+                                                                                                                                                                                                                                          cooldown_per_user_minutes: 30
+                                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                          # ── PLAYLIST REFRESH ──────────────────────────────────────────
+                                                                                                                                                                                                                                          playlist:
+                                                                                                                                                                                                                                            # How many tracks to pre-generate ahead in the queue
+                                                                                                                                                                                                                                              lookahead_tracks: 10
+                                                                                                                                                                                                                                                # Regenerate similarity pool every N minutes
+                                                                                                                                                                                                                                                  similarity_refresh_minutes: 30
+                                                                                                                                                                                                                                                    # Re-read preferences.yaml every N seconds (live reload)
+                                                                                                                                                                                                                                                      config_reload_seconds: 60
+                                                                                                                                                                                                                                                      
+                                                                                                                                                                                                                                                      # ── SYSTEM MAINTENANCE ────────────────────────────────────────
+                                                                                                                                                                                                                                                      maintenance:
+                                                                                                                                                                                                                                                        # Purge old audio cache files older than N hours
+                                                                                                                                                                                                                                                          cache_cleanup_hours: 24
+                                                                                                                                                                                                                                                            # Write state to disk every N seconds
+                                                                                                                                                                                                                                                              state_flush_seconds: 10
+                                                                                                                                                                                                                                                                # Health check endpoint ping interval
+                                                                                                                                                                                                                                                                  healthcheck_seconds: 30
+                                                                                                                                                                                                                                                                  
